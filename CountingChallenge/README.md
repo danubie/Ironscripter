@@ -15,8 +15,8 @@ The C-style FOR allows to specify an increment of 2, so I don't have to check fo
 
 ### Approche #2 : The Gauß Way
 This is the a variety of the Gauß formula to sum the natural numbers from 1 to n: `sum = n*(n+1)/2`\
-Because it's only to count the even numbers, which in fact is every second number, we'll end up in counting have the numbers from 1 to 100. So I'm using the orginal formula and divide the result by 2.\
-To make it look less mathematical and more technical instead of multiplying and dividing by 2 I use bitwise shifting.
+Because it's only to count the even numbers, which in fact is every second number, I'm using the orginal formula (including the odd ones) and divide the result by 2.\
+To make it look less mathematical and more technical instead, multiplying and dividing by 2 is replaced by bitwise shifting by 1.
 
     [int] $sum = ( ($last -shr 1)* ( ($last -shr 1) + 1) -shr 1 ) -shl 1
 
