@@ -1,5 +1,5 @@
 ﻿# Approche 1: C-style for
-function Add-EvenNumbersCStyleForLoop {
+function SumEvenNumbersCStyleForLoop {
     param (
         [Parameter(Position=0)]
         [int] $Last
@@ -14,7 +14,7 @@ function Add-EvenNumbersCStyleForLoop {
 
 # Approche 2 : The Gauß Way
 # This is the derived Gauß formular for the Numbers starting from 2
-function Add-GaußIncrement2 {
+function SumGaußIncrement2 {
     param (
         [Parameter(Position=0)]
         [int] $Last
@@ -34,7 +34,7 @@ function Add-GaußIncrement2 {
 }
 
 # The same, but without the overhead of calling the function
-function Add-GaußIncrement2b {
+function SumGaußIncrement2b {
     param (
         [Parameter(Position=0)]
         [int] $Last
@@ -45,7 +45,7 @@ function Add-GaußIncrement2b {
 }
 
 # Just for fun, the same, but replacing mutiplication and division by 2 by using bitwise shifting
-function Add-GaußIncrement2Bitwise {
+function SumGaußIncrement2Bitwise {
     param (
         [Parameter(Position=0)]
         [int] $Last
