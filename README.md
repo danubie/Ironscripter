@@ -32,6 +32,9 @@ Having this, It's easy to see, that this is similar valid for 2, 4, 6 ... 96, 98
 ## Intermediate
 This one derives from Approche 3. So I'm building an array of numbers to be summed up according to the parameters. Using Measure-Object to return expected values.
 
+## Bonus
+Intermediate almost was there. Now returns a pscustomobject with 3 properties
+
 # Pester tests
 I love to write Pester tests, so I could not resist to do it here as well.\
 By using Pester, it was easy to validate my results.
