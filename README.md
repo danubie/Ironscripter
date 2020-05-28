@@ -29,6 +29,9 @@ The simplicity of Gauß' formula - as far as I understood from school - relies o
 If you think of writing down the numbers 1, 2, 3, .... 98, 99, 100. Now each pair (1 & 100, 2 & 99, 3 & 98) sum up to 101.\
 Having this, It's easy to see, that this is similar valid for 2, 4, 6 ... 96, 98, 100 as well. So my algorithm takes the first and the last number, the second last, and so on, to build the sum.
 
-### Pester tests
+## Intermediate
+This one derives from Approche 3. So I'm building an array of numbers to be summed up according to the parameters.
+
+# Pester tests
 I love to write Pester tests, so I could not resist to do it here as well.\
 By using Pester, it was easy to validate my results.
