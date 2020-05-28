@@ -1,6 +1,6 @@
 ﻿# derived from the beginner
 # defaults represent the beginners challenge
-function SumGoingTheGaußWaySlowly2 {
+function Intermediate {
     param (
         [Parameter(Position=0)]
         [int] $Start = 2,
@@ -10,27 +10,14 @@ function SumGoingTheGaußWaySlowly2 {
         [int] $Increment = 2
     )
 
-    $last = ( $Maximum - $Start )/$Increment
-    $numbers = [int[]]::new(($Maximum - $Start + $Increment)/$Increment)
+    $last = [math]::Truncate( ( $Maximum - $Start ) / $Increment )
+    $numbers = [int[]]::new( $last + 1 )
     [int] $nextNumber = $Start
     # Create the array of even numbers
     for ( $i = 0; $i -le $Last; $i++) {
         $numbers[$i] = $nextNumber
         $nextNumber = $nextNumber + $Increment
     }
-    # now pick the first and the last, the second and second last, ...
-    [int] $sum = 0
-    [int] $lPick = 0                # Index to pick from the left
-    [int] $rPick = $Last            # Index to pick from the right
-    while ( $lPick -lt $rPick ) {
-        $sum = $sum + $numbers[$lPick] + $numbers[$rPick]
-        $lPick++
-        $rPick--
-    }
-    # edge case: it was an odd number of even numbers :-)
-    if ($lPick -eq $rPick) {
-        $sum + $numbers[$lPick]
-    } else {
-        $sum
-    }
+    $measure = $numbers | Measure-Object -AllStats
+    $measure | Select-Object -Property Sum, Average
 }
