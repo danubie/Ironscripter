@@ -24,7 +24,7 @@ To make it look less mathematical and more technical instead of multiplying and 
     [int] $sum = ( ($last -shr 1)* ( ($last -shr 1) + 1) -shr 1 ) -shl 1
 ```
 
-### Approche #3 : Slowly Going The Gauß Way
+### Approche #3 : Going The Gauß Way Slowly
 The simplicity of Gauß' formula - as far as I understood from school - relies on the fact, that the sum of two adjacent numbers is 101.\
 If you think of writing down the numbers 1, 2, 3, .... 98, 99, 100. Now each pair (1 & 100, 2 & 99, 3 & 98) sum up to 101.\
 Having this, It's easy to see, that this is similar valid for 2, 4, 6 ... 96, 98, 100 as well. So my algorithm takes the first and the last number, the second last, and so on, to build the sum.

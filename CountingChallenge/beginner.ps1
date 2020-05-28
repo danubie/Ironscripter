@@ -14,7 +14,7 @@ function SumEvenNumbersCStyleForLoop {
 
 # Approche 2 : The Gauß Way
 # This is the derived Gauß formular for the Numbers starting from 2
-function SumGaußIncrement2 {
+function SumGaußIncrement2Call {
     param (
         [Parameter(Position=0)]
         [int] $Last
@@ -53,4 +53,35 @@ function SumGaußIncrement2Bitwise {
 
     [int] $sum = ( ($last -shr 1)* ( ($last -shr 1) + 1) -shr 1 ) -shl 1
     $sum
+}
+
+# Approche 3: slowly going the Gauß Way
+function SumGoingTheGaußWaySlowly {
+    param (
+        [Parameter(Position=0)]
+        [int] $Last
+    )
+
+    $numbers = [int[]]::new($Last/2)
+    [int] $nextEvenNumber = 2
+    # Create the array of even numbers
+    for ( $i = 0; $i -lt $Last/2; $i++) {
+        $numbers[$i] = $nextEvenNumber
+        $nextEvenNumber = $nextEvenNumber + 2
+    }
+    # now pick the first and the last, the second and second last, ...
+    [int] $sum = 0
+    [int] $lPick = 0                # Index to pick from the left
+    [int] $rPick = ($Last / 2)-1    # Index to pick from the right
+    while ( $lPick -lt $rPick ) {
+        $sum = $sum + $numbers[$lPick] + $numbers[$rPick]
+        $lPick++
+        $rPick--
+    }
+    # edge case: it was an odd number of even numbers :-)
+    if ($lPick -eq $rPick) {
+        $sum + $numbers[$lPick]
+    } else {
+        $sum
+    }
 }
