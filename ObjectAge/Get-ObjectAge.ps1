@@ -18,10 +18,12 @@ function Get-ObjectAge {
         foreach ($item in $InputObject) {
             $objHash = [ordered] @{
                 AboveAvg    = $false
+                Age         = $null
             }
-            # services starttime can be null 8-)
+            # services starttime can be null. Are the running since the big bang?  8-)
             if ($CreateDateProperty -ne "" -and $null -ne $item.$CreateDateProperty ) {
                 $objHash.Add( $CreateDateProperty, [datetime] $item.$CreateDateProperty )
+                $objHash.Age = (Get-Date).Subtract( [datetime] $item.$CreateDateProperty )
             } else {
                 $objHash.Add( $CreateDateProperty, $null)
             }
