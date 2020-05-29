@@ -78,7 +78,7 @@ The (simplified) main loop just creates a custom object storing the dates and a 
         $queue.Enqueue( $obj )
     }
 
-In the end, the average is calculated and the indicator adjusted.
+In the end, the average is calculated and the indicator adjusted. Measure-Object cannot handle datetime directly so ticks are used instead.
 
     $avgCreatedate = $queue.$CreateDateProperty.Ticks | Measure-Object -Average
     foreach ($item in $queue) {
