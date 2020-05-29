@@ -7,7 +7,8 @@ function Get-ObjectAge {
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [string] $CreateDateProperty,
-        [string] $ModifyDateProperty    # I do allow NULL here if there's an object with just one date
+        [string] $ModifyDateProperty,    # I do allow NULL here if there's an object with just one date
+        [string[]] $Property            # list of properties to be added to the output
     )
 
     begin {
@@ -32,6 +33,14 @@ function Get-ObjectAge {
                 $objHash.Add( $ModifyDateProperty, [datetime] $item.$ModifyDateProperty )
             } else {
                 if ($ModifyDateProperty -ne "") { $objHash.Add( $ModifyDateProperty, $null) }
+            }
+            # Add addional properties
+            foreach ($propName in $Property) {
+                if ($propName -ne "" -and $null -ne $item.$propName ) {
+                    $objHash.Add( $propName, $item.$propName )
+                } else {
+                    if ($propName -ne "") { $objHash.Add( $propName, $null) }
+                }
             }
             $obj = [PSCustomObject] $objHash
             $queue.Enqueue( $obj )
