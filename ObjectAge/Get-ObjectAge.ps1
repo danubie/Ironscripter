@@ -1,3 +1,45 @@
+<#
+.SYNOPSIS
+The function checks arbitrary input objects for creation date
+
+.DESCRIPTION
+Get-ObjectAge manages to check the creation date of any different type of objects.
+It calculats the age of the obeject as well as an indicator whether the objects age is above the average within the
+group of objects.
+
+.PARAMETER InputObject
+Array of objects to be checked.
+
+.PARAMETER CreateDateProperty
+Name of the property containing the creation date.
+
+.PARAMETER ModifyDateProperty
+Name of the property containing the last modified date.
+
+.PARAMETER Property
+Array of strings each will be considered as an attribute of the objects. Each of these attributes are returned with
+the general result for each object
+
+.RETURNS
+returns a custom object containing the age, the flag "above average", the creation+modification date of the object
+and eventually additional properties of the inpt object
+
+.EXAMPLE
+$hash = @{
+            CreateDateProperty  = 'CreationTime'
+            ModifyDateProperty  = 'LastWriteTime'
+            Property = @('Name','Length','IsReadOnly')
+        }
+        $ret = Get-ChildItem -Path 'TestDrive:\' | Get-ObjectAge @hash
+Checks file dates (create+modified) of all files in the current directory
+
+.EXAMPLE
+$IdentityList | ForEachObject { Get-ADUser -Identity $_ -Properties lastLogon | Get-ObjectAge -CreateDateProperty 'lastLogon' }
+Checks the lastlogon date of a list of AD-Accounts via pipeline input
+
+.NOTES
+General notes
+#>
 function Get-ObjectAge {
     [CmdletBinding()]
     param (
