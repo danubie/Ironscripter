@@ -26,16 +26,17 @@ Reference: https://ironscripter.us/a-powershell-object-age-challenge/
 - Name of a property to be checked
 - InputObject parameter
 - via pipeline
-  - how to the date properties by propertyname?
+  - there are a lot of flavours of property names
+  - allow some common one by alias
 
 ## The first solution
 ### Design decisions
 - go with a pipeline design
   This would make it easy to handle objects of any kind in a really powershelly way.
-- rely on the fact, that the properties used to be tracked can be converted into `datetime`
+- assume  the properties to be tracked can be converted into `datetime`
 - keep the property names of the create/modify date attributes on output
 
-### Implementation
+### Implementation (simplified)
 The framework consists of a "08/15" design of a function accepting an array of (untyped) objects by parameter as well as by pipeline
 
     function Get-ObjectAge {
@@ -65,14 +66,14 @@ To be able to calculate the average of all objects (and still be pipeline ready)
         $queue = [System.Collections.Queue]::new()
     }
 
-The (simplified) main loop just creates a custom object storing the dates and a properties for age and the indicator *above yes or no*.
+The main loop just creates a custom object storing the dates and a properties for age and the indicator *above yes or no*.
 
     foreach ($item in $InputObject) {
         $objHash = [ordered] @{
             AboveAvg              = $false
             Age                   = ...
-            $CreateDateProperty   = [datetime] $item.$CreateDateProperty
-            $ModifyDateProperty   = [datetime] $item.$ModifyDateProperty
+            CreateDateProperty    = [datetime] $item.$CreateTimeProperty
+            ModifyDateProperty    = [datetime] $item.$ModifyTimeProperty
         }
         $obj = [PSCustomObject] $objHash
         $queue.Enqueue( $obj )
@@ -80,8 +81,12 @@ The (simplified) main loop just creates a custom object storing the dates and a 
 
 In the end, the average is calculated and the indicator adjusted. Measure-Object cannot handle datetime directly so ticks are used instead.
 
-    $avgCreatedate = $queue.$CreateDateProperty.Ticks | Measure-Object -Average
+    $avgCreatedate = $queue.$CreateTimeProperty.Ticks | Measure-Object -Average
     foreach ($item in $queue) {
-        if ( $item.$CreateDateProperty.Ticks -gt $avgCreatedate.Average ) { $item.AboveAvg = $true }
+        if ( $item.$CreateTimeProperty.Ticks -gt $avgCreatedate.Average ) { $item.AboveAvg = $true }
         $item
     }
+
+## Finally
+The final version handles some cases when properties do not exists or return non `datetime` results.\
+And it adds support for displaying additional object properties as well as some default property names when using verious objects via pipeline.
