@@ -41,6 +41,14 @@ Checks the lastlogon date of a list of AD-Accounts via pipeline input
 Get-ChildItem -Path . -File | Get-ObjectAge
 Outputs the age, CreationTime, ModificationTime and averageindicator for all files in the current directory
 
+.EXAMPLE
+get-process | Get-ObjectAge -CreateDateProperty StartTime -Property name, TotalProcessorTime
+Show the age of all processes
+
+.EXAMPLE
+Get-ADUser -Identity $env:USERNAME -Properties Created, Modified | Get-ObjectAge
+Show your current users age
+
 .NOTES
 General notes
 #>
