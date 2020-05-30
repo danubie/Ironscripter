@@ -61,4 +61,12 @@ Describe "Testing with files" {
     }
 }
 
+Describe "Testing with get-process" {
+    It "Should check StartTime and ExitTime" {
+        $testProcess = Get-Process | Select-Object -first 1
+        $ret = $testProcess | Get-ObjectAge
+        $ret.CreationTime | Should -Be ([datetime] $testProcess.StartTime)
+    }
+}
+
 
