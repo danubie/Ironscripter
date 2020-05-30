@@ -55,6 +55,10 @@ Describe "Testing with files" {
         $ret[0].Length      | Should -Be 0
         $ret[0].IsReadOnly  | Should -Be $false
     }
+    It "Using Filedates from ValueFromPipelineByPropertyName" {
+        $file0 = New-Item -Path 'Testdrive:\File0' -ItemType File -Force
+        $ret = $file0 | Get-ObjectAge
+    }
 }
 
 

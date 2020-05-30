@@ -1,28 +1,3 @@
-function Add-ValueFromPropertyOrPipeline {
-    # dirty little helper to use either the $item.$propertyname or $value depending on useValue
-    param (
-        [Parameter(Position=0)]
-        $HashTable,
-        [Parameter(Position=1)]
-        $PropertyName,
-        [Parameter(Position=2)]
-        $Item,
-        [Parameter(Position=3)]
-        $ValueOrPropertyName,
-        [Parameter(Position=5)]
-        $useAsValue
-    )
-    if ( $useAsValue -and $null -eq $Value ) {
-        $HashTable.Add( $PropertyName, $null )
-    } elseif ( !($useAsValue) -and $null -eq $Item.$ValueOrPropertyName ) {
-        $HashTable.Add( $PropertyName, $null )
-    } elseif ( $useAsValue ) {
-        $HashTable.Add( $PropertyName, [datetime] $ValueOrPropertyName )
-    } else {
-        $HashTable.Add( $PropertyName, [datetime] $Item.$ValueOrPropertyName )
-    }
-}
-
 <#
 .SYNOPSIS
 The function checks arbitrary input objects for creation date
@@ -62,6 +37,10 @@ Checks file dates (create+modified) of all files in the current directory
 $IdentityList | ForEachObject { Get-ADUser -Identity $_ -Properties lastLogon | Get-ObjectAge -CreateDateProperty 'lastLogon' }
 Checks the lastlogon date of a list of AD-Accounts via pipeline input
 
+.EXAMPLE
+Get-ChildItem -Path . -File | Get-ObjectAge
+Outputs the age, CreationTime, ModificationTime and averageindicator for all files in the current directory
+
 .NOTES
 General notes
 #>
@@ -73,7 +52,7 @@ function Get-ObjectAge {
         [System.Object[]] $InputObject,
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
-#        [Alias('CreationTime','CreationDate','StartDate','StartTime')]
+        [Alias('CreationTime','CreationDate')]
         [string] $CreateDateProperty,
         [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('LastWriteTime')]
@@ -82,6 +61,36 @@ function Get-ObjectAge {
     )
 
     begin {
+        function Add-ValueFromPropertyOrPipeline {
+            # dirty little helper to use either the $item.$propertyname or $value depending on useValue
+            param (
+                [Parameter(Position=0)]
+                $HashTable,
+                [Parameter(Position=1)]
+                $PropertyName,
+                [Parameter(Position=2)]
+                $Item,
+                [Parameter(Position=3)]
+                $ValueOrPropertyName,
+                [Parameter(Position=4)]
+                [switch] $useAsValue,
+                [Parameter(Position=5)]
+                [switch] $CastAsDateTime
+            )
+            if ( $useAsValue ) {
+                $value = $ValueOrPropertyName
+            } else {
+                $value = $Item.$ValueOrPropertyName
+            }
+            if ( $CastAsDateTime -and $null -eq $value ) {
+                $HashTable.Add( $PropertyName, $null )
+            } elseif ( $CastAsDateTime ) {
+                $HashTable.Add( $PropertyName, [datetime] $value )
+            } else {    # keep the original type
+                $HashTable.Add( $PropertyName, $value )
+            }
+        }
+
         $queue = [System.Collections.Queue]::new()
         # check if the property names are via commandline or if we have piped values
         #   a mandatory parameter via pipeline is validated by PS with each object coming from the pipeline
@@ -90,18 +99,18 @@ function Get-ObjectAge {
     }
 
     process {
-        foreach ($item in $InputObject) {
+        foreach ($obj in $InputObject) {
             $objHash = [ordered] @{
                 AboveAvg    = $false
                 Age         = $null
             }
             # services starttime can be null. Are the running since the big bang?  8-)
-            Add-ValueFromPropertyOrPipeline $objHash 'CreationTime'     $item $CreateDateProperty $isPipeline
-            Add-ValueFromPropertyOrPipeline $objHash 'TimeLastModified' $item $ModifyDateProperty $isPipeline
+            Add-ValueFromPropertyOrPipeline $objHash 'CreationTime'     $obj $CreateDateProperty $isPipeline -CastAsDateTime
+            Add-ValueFromPropertyOrPipeline $objHash 'TimeLastModified' $obj $ModifyDateProperty $isPipeline -CastAsDateTime
             $objHash.Age = [timespan] ( (Get-Date).Subtract($objHash.CreationTime) )
             # Add addional properties
             foreach ($propName in $Property) {
-                Add-ValueFromPropertyOrPipeline $objHash $propName $item $propName $false
+                Add-ValueFromPropertyOrPipeline $objHash $propName $obj ($obj.$propName) $true
             }
             $obj = [PSCustomObject] $objHash
             $queue.Enqueue( $obj )
@@ -110,9 +119,9 @@ function Get-ObjectAge {
 
     end {
         $avgCreatedate = $queue.CreationTime.Ticks | Measure-Object -Average
-        foreach ($item in $queue) {
-            if ( $item.CreationTime.Ticks -gt $avgCreatedate.Average ) { $item.AboveAvg = $true }
-            $item
+        foreach ($obj in $queue) {
+            if ( $obj.CreationTime.Ticks -gt $avgCreatedate.Average ) { $obj.AboveAvg = $true }
+            $obj
         }
     }
 }
