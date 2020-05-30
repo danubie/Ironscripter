@@ -52,11 +52,11 @@ function Get-ObjectAge {
         [System.Object[]] $InputObject,
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
-        [Alias('CreationTime','CreationDate')]
-        [string] $CreateDateProperty,
+        [Alias('CreationTime','CreationDate','StartTime','ExitTime')]
+        $CreateDateProperty,
         [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('LastWriteTime')]
-        [string] $ModifyDateProperty,    # I do allow NULL here if there's an object with just one date
+        $ModifyDateProperty,    # I do allow NULL here if there's an object with just one date
         [string[]] $Property            # list of properties to be added to the output
     )
 
@@ -95,7 +95,7 @@ function Get-ObjectAge {
         # check if the property names are via commandline or if we have piped values
         #   a mandatory parameter via pipeline is validated by PS with each object coming from the pipeline
         #   but it's value from the command line is empty or null as long as you do not use defaults
-        $isPipeline = ($CreateDateProperty -eq '')
+        $isPipeline = ($CreateDateProperty -eq '' -or $null -eq $CreateDateProperty)
     }
 
     process {
