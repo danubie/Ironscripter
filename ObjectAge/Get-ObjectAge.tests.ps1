@@ -75,12 +75,12 @@ Describe "Testing with get-process" {
 
 Describe "Testing with AD-User" {
     It "by property names" {
-        $user = get-aduser -Identity $env:USERNAME -Properties Created, Modified
+        $user = Get-ADUser -Identity $env:USERNAME -Properties Created, Modified
         $ret = $user | Get-ObjectAge -CreateDateProperty 'Created' -ModifyDateProperty 'Modified'
         $ret.CreationTime | Should -Be ([datetime] $user.Created)
     }
     It "by pipeline" {
-        $ret = get-aduser -Identity $env:USERNAME -Properties Created, Modified | Get-ObjectAge
+        $ret = Get-ADUser -Identity $env:USERNAME -Properties Created, Modified | Get-ObjectAge
         $ret.CreationTime       | Should -BeOfType [datetime]
         $ret.TimeLastModified   | Should -BeOfType [datetime]
     }
