@@ -107,7 +107,9 @@ function Get-ObjectAge {
             # services starttime can be null. Are the running since the big bang?  8-)
             Add-ValueFromPropertyOrPipeline $objHash 'CreationTime'     $obj $CreateDateProperty $isPipeline -CastAsDateTime
             Add-ValueFromPropertyOrPipeline $objHash 'TimeLastModified' $obj $ModifyDateProperty $isPipeline -CastAsDateTime
-            $objHash.Age = [timespan] ( (Get-Date).Subtract($objHash.CreationTime) )
+            if ( $null -ne $objHash.CreationTime ) {
+                $objHash.Age = [timespan] ( (Get-Date).Subtract($objHash.CreationTime) )
+            }
             # Add addional properties
             foreach ($propName in $Property) {
                 Add-ValueFromPropertyOrPipeline $objHash $propName $obj ($obj.$propName) $true
