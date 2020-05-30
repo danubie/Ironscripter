@@ -34,7 +34,7 @@ $hash = @{
 Checks file dates (create+modified) of all files in the current directory
 
 .EXAMPLE
-$IdentityList | ForEachObject { Get-ADUser -Identity $_ -Properties lastLogon | Get-ObjectAge -CreateDateProperty 'lastLogon' }
+$IdentityList | ForEachObject { Get-ADUser -Identity $_ -Properties lastLogon | Get-ObjectAge -CreateTimeProperty 'lastLogon' }
 Checks the lastlogon date of a list of AD-Accounts via pipeline input
 
 .EXAMPLE
@@ -42,7 +42,7 @@ Get-ChildItem -Path . -File | Get-ObjectAge
 Outputs the age, CreationTime, ModificationTime and averageindicator for all files in the current directory
 
 .EXAMPLE
-get-process | Get-ObjectAge -CreateDateProperty StartTime -Property name, TotalProcessorTime
+get-process | Get-ObjectAge -CreateTimeProperty StartTime -Property name, TotalProcessorTime
 Show the age of all processes
 
 .EXAMPLE
@@ -61,10 +61,10 @@ function Get-ObjectAge {
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [Alias('CreationTime','CreationDate','StartTime','ExitTime','Created')]
-        $CreateDateProperty,
+        $CreateTimeProperty,
         [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('LastWriteTime','Modified')]
-        $ModifyDateProperty,    # I do allow NULL here if there's an object with just one date
+        $ModifyTimeProperty,    # I do allow NULL here if there's an object with just one date
         [string[]] $Property            # list of properties to be added to the output
     )
 
@@ -103,7 +103,7 @@ function Get-ObjectAge {
         # check if the property names are via commandline or if we have piped values
         #   a mandatory parameter via pipeline is validated by PS with each object coming from the pipeline
         #   but it's value from the command line is empty or null as long as you do not use defaults
-        $isPipeline = ($CreateDateProperty -eq '' -or $null -eq $CreateDateProperty)
+        $isPipeline = ($CreateTimeProperty -eq '' -or $null -eq $CreateTimeProperty)
     }
 
     process {
@@ -113,8 +113,8 @@ function Get-ObjectAge {
                 Age         = $null
             }
             # services starttime can be null. Are the running since the big bang?  8-)
-            Add-ValueFromPropertyOrPipeline $objHash 'CreationTime'     $obj $CreateDateProperty $isPipeline -CastAsDateTime
-            Add-ValueFromPropertyOrPipeline $objHash 'TimeLastModified' $obj $ModifyDateProperty $isPipeline -CastAsDateTime
+            Add-ValueFromPropertyOrPipeline $objHash 'CreationTime'     $obj $CreateTimeProperty $isPipeline -CastAsDateTime
+            Add-ValueFromPropertyOrPipeline $objHash 'TimeLastModified' $obj $ModifyTimeProperty $isPipeline -CastAsDateTime
             if ( $null -ne $objHash.CreationTime ) {
                 $objHash.Age = [timespan] ( (Get-Date).Subtract($objHash.CreationTime) )
             }

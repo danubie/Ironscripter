@@ -3,21 +3,21 @@
 Describe "Simple tests using get-date" {
     It "single object, no Modifydate" {
         $now = (Get-Date)
-        $ret = $now | Get-ObjectAge -CreateDateProperty 'Ticks'
+        $ret = $now | Get-ObjectAge -CreateTimeProperty 'Ticks'
         # $ret | Should -Be $now seems to be not correct
         ($ret.CreationTime -eq $now.Ticks) | Should -BeTrue
         $ret.Age | Should -BeGreaterThan 0
     }
     It "single object invalid modifydateproperty should be silently ignored" {
         $now = (Get-Date)
-        $ret = $now | Get-ObjectAge -CreateDateProperty 'Ticks' -ModifyDateProperty 'Unknown'
+        $ret = $now | Get-ObjectAge -CreateTimeProperty 'Ticks' -ModifyTimeProperty 'Unknown'
         # $ret | Should -Be $now seems to be not correct
         ($ret.CreationTime -eq $now.Ticks) | Should -BeTrue
     }
     It "single object additonal properties" {
         $now = (Get-Date)
         $hash = @{
-            CreateDateProperty  = 'Ticks'
+            CreateTimeProperty  = 'Ticks'
             Property = @('Year','Month','Day')
         }
         $ret = $now | Get-ObjectAge @hash
@@ -37,8 +37,8 @@ Describe "Testing with files" {
 
         # Act testing
         $hash = @{
-            CreateDateProperty  = 'CreationTime'
-            ModifyDateProperty  = 'LastWriteTime'
+            CreateTimeProperty  = 'CreationTime'
+            ModifyTimeProperty  = 'LastWriteTime'
             Property = @('Name','Length','IsReadOnly')
         }
         $ret = Get-ChildItem -Path 'TestDrive:\' | Get-ObjectAge @hash
@@ -64,7 +64,7 @@ Describe "Testing with files" {
 Describe "Testing with get-process" {
     It "Should check StartTime by Parameter (no access denied)" {
         $testProcess = Get-Process -name 'powershell' | Select-Object -First 1
-        $ret = $testProcess | Get-ObjectAge -CreateDateProperty 'StartTime'
+        $ret = $testProcess | Get-ObjectAge -CreateTimeProperty 'StartTime'
         $ret.CreationTime | Should -Be ([datetime] $testProcess.StartTime)
     }
     It "Works by Pipeline (system processes break with access denied if nonadmin)" {
@@ -76,7 +76,7 @@ Describe "Testing with get-process" {
 Describe "Testing with AD-User" {
     It "by property names" {
         $user = Get-ADUser -Identity $env:USERNAME -Properties Created, Modified
-        $ret = $user | Get-ObjectAge -CreateDateProperty 'Created' -ModifyDateProperty 'Modified'
+        $ret = $user | Get-ObjectAge -CreateTimeProperty 'Created' -ModifyTimeProperty 'Modified'
         $ret.CreationTime | Should -Be ([datetime] $user.Created)
     }
     It "by pipeline" {
