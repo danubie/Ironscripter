@@ -69,7 +69,7 @@ Describe "Testing with get-process" {
     }
     It "Works by Pipeline (system processes break with access denied if nonadmin)" {
         $ret = Get-Process -name 'powershell' | Select-Object -First 1 | Get-ObjectAge
-        $ret.CreationTime | Should -Be ([datetime] $testProcess.StartTime)
+        $ret.CreationTime | Should -BeOfType [datetime]
     }
 }
 
