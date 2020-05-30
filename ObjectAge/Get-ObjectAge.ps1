@@ -82,7 +82,7 @@ function Get-ObjectAge {
             } else {
                 $value = $Item.$ValueOrPropertyName
             }
-            if ( $CastAsDateTime -and $null -eq $value ) {
+            if ( $CastAsDateTime -and ($null -eq $value -or "" -eq $value) ) {
                 $HashTable.Add( $PropertyName, $null )
             } elseif ( $CastAsDateTime ) {
                 $HashTable.Add( $PropertyName, [datetime] $value )
