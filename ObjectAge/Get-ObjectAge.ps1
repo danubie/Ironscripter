@@ -52,10 +52,10 @@ function Get-ObjectAge {
         [System.Object[]] $InputObject,
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
-        [Alias('CreationTime','CreationDate','StartTime','ExitTime')]
+        [Alias('CreationTime','CreationDate','StartTime','ExitTime','Created')]
         $CreateDateProperty,
         [Parameter(ValueFromPipelineByPropertyName)]
-        [Alias('LastWriteTime')]
+        [Alias('LastWriteTime','Modified')]
         $ModifyDateProperty,    # I do allow NULL here if there's an object with just one date
         [string[]] $Property            # list of properties to be added to the output
     )
