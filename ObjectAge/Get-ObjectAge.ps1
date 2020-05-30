@@ -1,3 +1,28 @@
+function Add-ValueFromPropertyOrPipeline {
+    # dirty little helper to use either the $item.$propertyname or $value depending on useValue
+    param (
+        [Parameter(Position=0)]
+        $HashTable,
+        [Parameter(Position=1)]
+        $PropertyName,
+        [Parameter(Position=2)]
+        $Item,
+        [Parameter(Position=3)]
+        $ValueOrPropertyName,
+        [Parameter(Position=5)]
+        $useAsValue
+    )
+    if ( $useAsValue -and $null -eq $Value ) {
+        $HashTable.Add( $PropertyName, $null )
+    } elseif ( !($useAsValue) -and $null -eq $Item.$ValueOrPropertyName ) {
+        $HashTable.Add( $PropertyName, $null )
+    } elseif ( $useAsValue ) {
+        $HashTable.Add( $PropertyName, [datetime] $ValueOrPropertyName )
+    } else {
+        $HashTable.Add( $PropertyName, [datetime] $Item.$ValueOrPropertyName )
+    }
+}
+
 <#
 .SYNOPSIS
 The function checks arbitrary input objects for creation date
@@ -46,15 +71,22 @@ function Get-ObjectAge {
         # Any Input object to get an anti-aging check
         [Parameter(Position=0, ValueFromPipeline, ValueFromPipelineByPropertyName, Mandatory=$true)]
         [System.Object[]] $InputObject,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
+#        [Alias('CreationTime','CreationDate','StartDate','StartTime')]
         [string] $CreateDateProperty,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('LastWriteTime')]
         [string] $ModifyDateProperty,    # I do allow NULL here if there's an object with just one date
         [string[]] $Property            # list of properties to be added to the output
     )
 
     begin {
         $queue = [System.Collections.Queue]::new()
+        # check if the property names are via commandline or if we have piped values
+        #   a mandatory parameter via pipeline is validated by PS with each object coming from the pipeline
+        #   but it's value from the command line is empty or null as long as you do not use defaults
+        $isPipeline = ($CreateDateProperty -eq '')
     }
 
     process {
@@ -64,25 +96,12 @@ function Get-ObjectAge {
                 Age         = $null
             }
             # services starttime can be null. Are the running since the big bang?  8-)
-            if ($CreateDateProperty -ne "" -and $null -ne $item.$CreateDateProperty ) {
-                $objHash.Add( $CreateDateProperty, [datetime] $item.$CreateDateProperty )
-                $objHash.Age = (Get-Date).Subtract( [datetime] $item.$CreateDateProperty )
-            } else {
-                $objHash.Add( $CreateDateProperty, $null)
-            }
-            # ModifyProperty specified and must exist
-            if ($ModifyDateProperty -ne "" -and $null -ne $item.$ModifyDateProperty ) {
-                $objHash.Add( $ModifyDateProperty, [datetime] $item.$ModifyDateProperty )
-            } else {
-                if ($ModifyDateProperty -ne "") { $objHash.Add( $ModifyDateProperty, $null) }
-            }
+            Add-ValueFromPropertyOrPipeline $objHash 'CreationTime'     $item $CreateDateProperty $isPipeline
+            Add-ValueFromPropertyOrPipeline $objHash 'TimeLastModified' $item $ModifyDateProperty $isPipeline
+            $objHash.Age = [timespan] ( (Get-Date).Subtract($objHash.CreationTime) )
             # Add addional properties
             foreach ($propName in $Property) {
-                if ($propName -ne "" -and $null -ne $item.$propName ) {
-                    $objHash.Add( $propName, $item.$propName )
-                } else {
-                    if ($propName -ne "") { $objHash.Add( $propName, $null) }
-                }
+                Add-ValueFromPropertyOrPipeline $objHash $propName $item $propName $false
             }
             $obj = [PSCustomObject] $objHash
             $queue.Enqueue( $obj )
@@ -90,9 +109,9 @@ function Get-ObjectAge {
     }
 
     end {
-        $avgCreatedate = $queue.$CreateDateProperty.Ticks | Measure-Object -Average
+        $avgCreatedate = $queue.CreationTime.Ticks | Measure-Object -Average
         foreach ($item in $queue) {
-            if ( $item.$CreateDateProperty.Ticks -gt $avgCreatedate.Average ) { $item.AboveAvg = $true }
+            if ( $item.CreationTime.Ticks -gt $avgCreatedate.Average ) { $item.AboveAvg = $true }
             $item
         }
     }

@@ -5,13 +5,14 @@ Describe "Simple tests using get-date" {
         $now = (Get-Date)
         $ret = $now | Get-ObjectAge -CreateDateProperty 'Ticks'
         # $ret | Should -Be $now seems to be not correct
-        ($ret.Ticks -eq $now) | Should -BeTrue
+        ($ret.CreationTime -eq $now.Ticks) | Should -BeTrue
+        $ret.Age | Should -BeGreaterThan 0
     }
     It "single object invalid modifydateproperty should be silently ignored" {
         $now = (Get-Date)
         $ret = $now | Get-ObjectAge -CreateDateProperty 'Ticks' -ModifyDateProperty 'Unknown'
         # $ret | Should -Be $now seems to be not correct
-        ($ret.Ticks -eq $now) | Should -BeTrue
+        ($ret.CreationTime -eq $now.Ticks) | Should -BeTrue
     }
     It "single object additonal properties" {
         $now = (Get-Date)
