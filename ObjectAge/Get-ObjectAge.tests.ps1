@@ -21,9 +21,9 @@ Describe "Simple tests using get-date" {
             Property = @('Year','Month','Day')
         }
         $ret = $now | Get-ObjectAge @hash
-        $ret.Year   | Should -Not -BeNullOrEmpty
-        $ret.Month  | Should -Not -BeNullOrEmpty
-        $ret.Day    | Should -Not -BeNullOrEmpty
+        $ret.Year   | Should -Be $now.Year
+        $ret.Month  | Should -Be $now.Month
+        $ret.Day    | Should -Be $now.Day
     }
 }
 Describe "Testing with files" {
