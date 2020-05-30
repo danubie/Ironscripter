@@ -5,13 +5,14 @@ Describe "Simple tests using get-date" {
         $now = (Get-Date)
         $ret = $now | Get-ObjectAge -CreateDateProperty 'Ticks'
         # $ret | Should -Be $now seems to be not correct
-        ($ret.Ticks -eq $now) | Should -BeTrue
+        ($ret.CreationTime -eq $now.Ticks) | Should -BeTrue
+        $ret.Age | Should -BeGreaterThan 0
     }
     It "single object invalid modifydateproperty should be silently ignored" {
         $now = (Get-Date)
         $ret = $now | Get-ObjectAge -CreateDateProperty 'Ticks' -ModifyDateProperty 'Unknown'
         # $ret | Should -Be $now seems to be not correct
-        ($ret.Ticks -eq $now) | Should -BeTrue
+        ($ret.CreationTime -eq $now.Ticks) | Should -BeTrue
     }
     It "single object additonal properties" {
         $now = (Get-Date)
@@ -20,9 +21,9 @@ Describe "Simple tests using get-date" {
             Property = @('Year','Month','Day')
         }
         $ret = $now | Get-ObjectAge @hash
-        $ret.Year   | Should -Not -BeNullOrEmpty
-        $ret.Month  | Should -Not -BeNullOrEmpty
-        $ret.Day    | Should -Not -BeNullOrEmpty
+        $ret.Year   | Should -Be $now.Year
+        $ret.Month  | Should -Be $now.Month
+        $ret.Day    | Should -Be $now.Day
     }
 }
 Describe "Testing with files" {
@@ -53,6 +54,10 @@ Describe "Testing with files" {
         $ret[0].Name        | Should -Be 'File0'
         $ret[0].Length      | Should -Be 0
         $ret[0].IsReadOnly  | Should -Be $false
+    }
+    It "Using Filedates from ValueFromPipelineByPropertyName" {
+        $file0 = New-Item -Path 'Testdrive:\File0' -ItemType File -Force
+        $ret = $file0 | Get-ObjectAge
     }
 }
 
